@@ -96,7 +96,7 @@ enum channel {
 class ModuleAD7705 {
 
 public:
-  ModuleAD7705(uint8_t cs, uint8_t sclk, uint8_t din, uint8_t reset, uint8_t drdy, uint8_t dout); // Existing constructor
+  ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin); // Existing constructor
   ModuleAD7705(); // Default constructor
 
   /**
@@ -234,7 +234,7 @@ public:
     }
 
 private:
-    uint8_t _cs, sclk, din, _reset, _drdy, dout;
+    uint8_t _cs, _reset, _drdy;
 
     /*
     * Setter for the external function for Writing Digital Pin by microcontroller

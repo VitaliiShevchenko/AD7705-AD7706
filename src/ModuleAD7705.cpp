@@ -72,16 +72,17 @@
 
    
 
-ModuleAD7705::ModuleAD7705(uint8_t cs, uint8_t sclk, uint8_t din, uint8_t reset, uint8_t drdy, uint8_t dout):
-    _cs(cs),
-    sclk(sclk),
-    din(din),
-    _reset(reset),
-    _drdy(drdy),
-    dout(dout)
+ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
+    _cs(cs_pin),
+    _reset(reset_pin),
+    _drdy(drdy_pin)
 {
-    // Constructor
-    // init();
+    // initialize OUTPUT pins
+    pinMode(_cs,     OUTPUT);
+    pinMode(_reset,  OUTPUT);
+    
+    // initialize INPUT pins
+    pinMode(_drdy,    INPUT);
 }
 
 
