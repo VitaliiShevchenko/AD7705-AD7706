@@ -20,6 +20,8 @@
 #pragma once
 
 #include "atmega2560_pin_config.h"
+#include <stdint.h>
+#include <SPI.h>
 
 #define DELAY_BY_RESET 50
 
@@ -134,13 +136,31 @@ public:
   int read_serial_data_24();
 
    /**
-   * Reading data from the determined AD7705/AD7706 channel
+   * Reading data from the Data Register of the determined AD7705/AD7706 channel
+   * 
+   * @param channel from the MACRO function CHx_01
    *
    * @return 16-bit value of the choose channel
    */
-  int read_channel_one();
-  int read_channel_two();
-  int read_channel_three();
+  int read_channel(uint8_t channel);
+
+   /**
+   * Reading data from the Clock Register of the determined AD7705/AD7706 channel
+   * 
+   * @param channel from the MACRO function CHx_01
+   *
+   * @return 8-bit value of the choose channel
+   */
+  int read_clock_channel(uint8_t channel);
+
+     /**
+   * Reading data from the Setup Register of the determined AD7705/AD7706 channel
+   * 
+   * @param channel from the MACRO function CHx_01
+   *
+   * @return 8-bit value of the choose channel
+   */
+  int read_setup_channel(uint8_t channel);
 
 
    /**
@@ -191,6 +211,22 @@ public:
    */
   void write_register(uint8_t instruction);
 
+    /**
+     * Public methods which print data to the external environment
+     */
+    void print(char txt[]){
+      Serial.print(txt);
+    }
+    void print(int num){
+      Serial.print(num);
+    }
+    void println(char txt[]){
+      Serial.println(txt);
+    }
+    void println(int num){
+      Serial.println(num);
+    }
+
 private:
     uint8_t _cs, sclk, din, _reset, _drdy, dout;
 
@@ -209,5 +245,7 @@ private:
     *
     * @return 0 if successed and -1 if appear a runtime error
     */
-    int ModuleAD7705::waitDataReady();
+    int ModuleAD7705::waitingOnDataReady();
+
+
 };
