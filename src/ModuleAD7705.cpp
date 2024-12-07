@@ -169,9 +169,11 @@ int ModuleAD7705::read_serial_data_16()
 
 int ModuleAD7705::read_serial_data_24()
 {
-    // int data = 0x00;
-    // waitingOnDataReady();
-    // return SPI.transfer(data, 3);
+    int data = 0x00;
+    waitingOnDataReady();
+    SPI.transfer(data, 3);
+
+    return data;
 }
 
 int ModuleAD7705::read_serial_data(uint8_t size)

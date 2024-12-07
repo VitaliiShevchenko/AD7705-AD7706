@@ -85,10 +85,10 @@
 #define CLRG_FS_CLK_IS_HIGH_500Hz_131Hz 0x03
 
 enum channel {
-  ONE = CH0_01,
-  TWO = CH1_01,
-  THREE = CH3_01,
-  COMMON = CH2_01
+  ONE = CH0_01,              // [Register Pair 0]
+  TWO = CH1_01,              // [Register Pair 1]
+  COMMON = CH2_01,           // [Register Pair 0]
+  THREE = CH3_01             // [Register Pair 2]
 };
 
 #define CHANNEL_MASK 0x03
