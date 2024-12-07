@@ -1,0 +1,2 @@
+Documentation by ADC AD7705/AD7706 see on the website of the ANALOG DEVICES producer by this link
+ https://www.analog.com/media/en/technical-documentation/data-sheets/AD7705_7706.pdf
