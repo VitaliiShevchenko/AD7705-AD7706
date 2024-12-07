@@ -19,8 +19,7 @@
 */
 
 #include "ModuleAD7705.h"
-#include <stdint.h>
-#include <SPI.h>
+
 
 #define LOW  0x00
 #define HIGH 0x01
@@ -45,7 +44,7 @@
 #define HZ2S(hz)    US2S(HZ2US(hz))
 
 #define TIME_WRITE           1                          // delay 1 ms
-#define CYCLES_LIMIT         (32767)                    // 1s / 50tacts * 16000000Hz = 320000
+#define CYCLES_LIMIT int     (320000)                    // 1s / 50tacts * 16000000Hz = 320000
 #define TIME_READ_DELAY      1                          // delay 1 ms
 #define START_TIME_DELAY_us  6                          // delay 6 us by 4.9512 MHz | 16 us by 2.4576 MHz | 20 us by 1MHz
 #define F_CLKIN_HZ           1.45 * 1e6                 // 400kHz-2.5MHz (For specified performance) 45-55% is the best
@@ -98,7 +97,6 @@ void ModuleAD7705::init()
     write_register(ZERO_DRDY_7&0 | SETUP_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | CH0_01) ;    //0x10
     // Write to the SETUP REGISTER: self-calibration, unipolar mode(0 to 5v) and buffer disable
     write_register(STRG_MD_SELF_CALIBR_76 | STRG_GAIN1_543 | STRG_UNIPOLAR_OPERATION_2 | STRG_BUFFER_ENABLE_1 &0| STRG_FSYNC_IN_RESET_STATE&0);//0x44
-      SPI.begin();
 }
 
 
@@ -150,68 +148,43 @@ bool ModuleAD7705::digitalRead(uint8_t pin)
 
 void ModuleAD7705::write_register(uint8_t instruction)
 {
-    // digitalWrite(_cs, LOW);
-    for(uint8_t bit=0; bit < 8; bit++)
-    {
-        //delayMicroseconds(12);//
-        // delay(1);
-        digitalWrite(sclk, LOW);
-        //delayMicroseconds(12);
-        // delay(1);
-        digitalWrite(din, READ_BIT(instruction, 7-bit));
-        digitalWrite(sclk, HIGH);
-    }
-    //delayMicroseconds(12);
-    // delay(1);
-    // digitalWrite(_cs, HIGH);
+    SPI.transfer(instruction);
 }
 
 int ModuleAD7705::read_serial_data()
 {
-    uint8_t q_bit = 8;
-    read_serial_data(q_bit);
+    uint8_t data = 0x00;
+    waitingOnDataReady();
+
+    return SPI.transfer(data);
 }
 
 int ModuleAD7705::read_serial_data_16()
 {
-    uint8_t q_bit = 16;
-    return read_serial_data(q_bit);
+    uint16_t data = 0x00;
+    waitingOnDataReady();
+
+    return SPI.transfer16(data);
 }
 
 int ModuleAD7705::read_serial_data_24()
 {
-    uint8_t q_bit = 24;
-    return read_serial_data(q_bit);
+    // int data = 0x00;
+    // waitingOnDataReady();
+    // return SPI.transfer(data, 3);
 }
 
-int ModuleAD7705::read_serial_data(uint8_t q_bit)
+int ModuleAD7705::read_serial_data(uint8_t size)
 {
-    uint16_t data = 0x00 ; // 1 cycle. Sum = 6.5cycles (406ns)
-    //digitalWrite(_cs, LOW); // 1-2 cycles. Sum = 8cycles
-    //digitalWrite(sclk, HIGH); // 1-2 cycles. Sum = 9.5cycles
-    //delayMicroseconds(12);
-    // delay(1);
-    uint8_t sreg = SREG;
-    noInterrupts();
-    for(uint8_t bit = 0; bit < q_bit; bit++)                     // 1cycle
-    {
-        
-        
-        digitalWrite(sclk, LOW);                                 //1-2 cycles
-        //delayMicroseconds(12);
-        // delay(1);
-        Serial.print(digitalRead(dout));
-        if ( digitalRead(dout) & 1 ) SET_BIT(data, q_bit-bit-1);   //8cycles
-        digitalWrite(sclk, HIGH);                                //1-2 cycles
-        //delayMicroseconds(12);
-        // delay(1);
-    }                                                            // 2 cycles
-    //digitalWrite(_cs, HIGH);
-    SREG = sreg;
-    return data;
+    const int data[size] = {};
+    int data1;
+    waitingOnDataReady();
+    SPI.transfer(data, size);
+
+    return data[0];
 }
 
-int ModuleAD7705::waitDataReady()
+int ModuleAD7705::waitingOnDataReady()
 {
     int cycles = 0;
     
@@ -219,36 +192,30 @@ int ModuleAD7705::waitDataReady()
     {
         if (cycles++ == CYCLES_LIMIT)
         {
-            Serial.print("Runtime Error: flag _DRDY is not ready during ");
-            Serial.print(CYCLES_LIMIT);
-            Serial.println(" cycles. Reinitialization!");
-            init();
-            return 0;
+            print("Runtime Error: flag _DRDY is not ready during ");
+            print(CYCLES_LIMIT);
+            println(" cycles. Reinitialization!");
+            return -1; // this is where you can place the error code if a corresponding handler is created
         }
     }
 
     return 0;
 }
 
-int ModuleAD7705::read_channel_one()
+int ModuleAD7705::read_channel(uint8_t channel)
 {
-    // while(digitalRead(_drdy ) == 1){}
-    //waitDataReady();
-    write_register(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | CH0_01);  //0x38  1-2 cycles
-    return read_serial_data_16(); // 4 cycles. Sum = 5.5cycles
-}
-
-int ModuleAD7705::read_channel_two()
-{
-    //while(digitalRead(_drdy)){}
-    write_register(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | CH1_01);  //0x39
+    SPI.transfer(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel);
     return read_serial_data_16();
 }
 
-int ModuleAD7705::read_channel_three()
+int ModuleAD7705::read_clock_channel(uint8_t channel)
 {
-    while(digitalRead(_drdy)){}
-    write_register(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | CH3_01);  //0x3B
-    return read_serial_data_16();
+    SPI.transfer(ZERO_DRDY_7 & 0x00 | CLOCK_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel);  //0x28
+    return read_serial_data();
 }
 
+int ModuleAD7705::read_setup_channel(uint8_t channel)
+{
+    SPI.transfer(ZERO_DRDY_7 & 0x00 | SETUP_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel);  //0x28
+    return read_serial_data();
+}
