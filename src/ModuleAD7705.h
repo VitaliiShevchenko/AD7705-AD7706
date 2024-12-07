@@ -121,9 +121,7 @@ public:
   bool isDataReady();
 
    /**
-   * Perform a "Read q-bit data from the Serial pin DOUT of AD7705/AD7706"
-   *
-   * @param q_bit is an amount bits of reading data, defaults to 0x08 if not specified
+   * Perform a "Read 8-bit data from the Serial pin DOUT of AD7705/AD7706"
    *
    * @return discrete output value
    */
