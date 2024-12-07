@@ -23,6 +23,8 @@
 #define LOW  0x00
 #define HIGH 0x01
 
+#define CYCLES_LIMIT int     (320000)                    // 1s / 50tacts * 16000000Hz = 320000
+
 ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     _cs(cs_pin),
     _reset(reset_pin),
