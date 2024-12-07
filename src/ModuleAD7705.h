@@ -128,7 +128,6 @@ public:
    * @return discrete output value
    */
   int read_serial_data();
-  int read_serial_data(uint8_t q_bit);
 
    /**
    * Perform a "Read 16-bit data from the Serial pin DOUT of AD7705/AD7706"

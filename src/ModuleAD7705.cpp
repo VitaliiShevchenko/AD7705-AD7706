@@ -176,16 +176,6 @@ int ModuleAD7705::read_serial_data_24()
     return data;
 }
 
-int ModuleAD7705::read_serial_data(uint8_t size)
-{
-    const int data[size] = {};
-    int data1;
-    waitingOnDataReady();
-    SPI.transfer(data, size);
-
-    return data[0];
-}
-
 int ModuleAD7705::waitingOnDataReady()
 {
     int cycles = 0;
