@@ -25,6 +25,8 @@
 
 #define CYCLES_LIMIT int     (320000)                    // 1s / 50tacts * 16000000Hz = 320000
 
+#define DELAY_BY_RESET        50
+
 ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     _cs(cs_pin),
     _reset(reset_pin),
@@ -33,7 +35,7 @@ ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     // initialize OUTPUT pins
     pinMode(_cs,     OUTPUT);
     pinMode(_reset,  OUTPUT);
-
+    
     // initialize INPUT pins
     pinMode(_drdy,    INPUT);
 }
@@ -41,7 +43,6 @@ ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
 
 void ModuleAD7705::init()
 {
-    // Serial.println("init");
     reset_adc();
     // Choose CLOCK REGISTER with mode 'WRITE' next operation 
     write_register(ZERO_DRDY_7&0 | CLOCK_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | CH0_01); //0x20
@@ -56,12 +57,9 @@ void ModuleAD7705::init()
 
 void ModuleAD7705::reset_adc()
 {
-    //digitalWrite(_cs, LOW);    // put _CS to LOW level
-    digitalWrite(_reset, LOW); // put _RESET to LOW level
-    delayMicroseconds(100);
-    digitalWrite(_reset, HIGH);// put _RESET to HIGH level
-    //digitalWrite(_cs, HIGH);   // put _CS to HIGH level
-    //digitalWrite(sclk, HIGH);  // put SCLK to high level
+    digitalWrite(_reset, LOW);   // put _RESET to LOW level
+    delayMicroseconds(DELAY_BY_RESET);
+    digitalWrite(_reset, HIGH);  // put _RESET to HIGH level
 };
 
  bool ModuleAD7705::isDataReady()
@@ -105,27 +103,29 @@ void ModuleAD7705::write_register(uint8_t instruction)
     SPI.transfer(instruction);
 }
 
-int ModuleAD7705::read_serial_data()
+uint8_t ModuleAD7705::read_serial_data()
 {
     uint8_t data = 0x00;
     waitingOnDataReady();
-
-    return SPI.transfer(data);
+    data = SPI.transfer(data);  // read 8-bits Register
+    return data;
 }
 
-int ModuleAD7705::read_serial_data_16()
+uint16_t ModuleAD7705::read_serial_data_16()
 {
+    digitalWrite(_cs, LOW);
     uint16_t data = 0x00;
     waitingOnDataReady();
+    data = SPI.transfer16(data);  //read 16-bits Register
 
-    return SPI.transfer16(data);
+    return data; 
 }
 
 int ModuleAD7705::read_serial_data_24()
 {
     int data = 0x00;
     waitingOnDataReady();
-    SPI.transfer(data, 3);
+    SPI.transfer(data, 3);    //read 24-bits Register
 
     return data;
 }
@@ -150,18 +150,40 @@ int ModuleAD7705::waitingOnDataReady()
 
 int ModuleAD7705::read_channel(uint8_t channel)
 {
-    SPI.transfer(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
-    return read_serial_data_16();
+    select_adc();
+    write_register(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
+    uint16_t data = read_serial_data_16();
+    unselect_adc();
+
+    return data;
 }
 
 int ModuleAD7705::read_clock_channel(uint8_t channel)
 {
-    SPI.transfer(ZERO_DRDY_7 & 0x00 | CLOCK_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
-    return read_serial_data();
+    select_adc();
+    write_register(ZERO_DRDY_7 & 0x00 | CLOCK_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
+    uint8_t data = read_serial_data();
+    unselect_adc();
+
+    return data;
 }
 
 int ModuleAD7705::read_setup_channel(uint8_t channel)
 {
-    SPI.transfer(ZERO_DRDY_7 & 0x00 | SETUP_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
-    return read_serial_data();
+    select_adc();
+    write_register(ZERO_DRDY_7 & 0x00 | SETUP_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
+    uint8_t data = read_serial_data();
+    unselect_adc();
+
+    return data;
+}
+
+void ModuleAD7705::select_adc()
+{
+    digitalWrite(_cs, LOW);
+}
+
+void ModuleAD7705::unselect_adc()
+{
+    digitalWrite(_cs, HIGH);
 }

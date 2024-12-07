@@ -23,8 +23,6 @@
 #include <stdint.h>
 #include <SPI.h>
 
-#define DELAY_BY_RESET 50
-
 // Instruction See page 16 of doc by https://www.analog.com/media/en/technical-documentation/data-sheets/AD7705_7706.pdf
 // COMMUNUCATON REGISTER
 #define ZERO_DRDY_7       0x80
@@ -125,14 +123,14 @@ public:
    *
    * @return discrete output value
    */
-  int read_serial_data();
+  uint8_t read_serial_data();
 
    /**
    * Perform a "Read 16-bit data from the Serial pin DOUT of AD7705/AD7706"
    *
    * @return discrete output value
    */
-  int read_serial_data_16();
+  uint16_t read_serial_data_16();
 
    /**
    * Perform a "Read 24-bit data from the Serial pin DOUT of AD7705/AD7706"
@@ -233,6 +231,9 @@ public:
       Serial.println(num);
     }
 
+    void   select_adc();
+    void unselect_adc();
+
 private:
     uint8_t _cs, _reset, _drdy;
 
@@ -252,6 +253,4 @@ private:
     * @return 0 if successed and -1 if appear a runtime error
     */
     int ModuleAD7705::waitingOnDataReady();
-
-
 };
