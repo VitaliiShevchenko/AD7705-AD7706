@@ -84,6 +84,13 @@
 #define CLRG_FS_CLK_IS_HIGH_250Hz_66Hz 0x02
 #define CLRG_FS_CLK_IS_HIGH_500Hz_131Hz 0x03
 
+enum channel {
+  ONE = CH0_01,
+  TWO = CH1_01,
+  THREE = CH3_01,
+  COMMON = CH2_01
+};
+
 class ModuleAD7705 {
 
 public:
