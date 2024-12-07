@@ -39,11 +39,18 @@
 #define WRITE_3           0x00
 #define NORMAL_OP_MODE_2  0x00
 #define POWER_DOWN_MODE_2 0x04
-//                                       AD7705      |     AD7706
-#define CH0_01            0x00 //       AIN1+ AIN1-  |      AIN1
-#define CH1_01            0x01 //       AIN2+ AIN2-  |      AIN2
-#define CH2_01            0x02 //       AIN1- AIN1-  |     COMMON
-#define CH3_01            0x03 //       AIN1- AIN2-  |      AIN3
+//                                           AD7705        |     AD7706
+#define CH0_01            0x00 //       (AIN1+) + (AIN1-)  |   AIN1 + COMMON
+#define CH1_01            0x01 //       (AIN2+) + (AIN2-)  |   AIN2 + COMMON
+#define CH2_01            0x02 //       (AIN1-) + (AIN1-)  |   COMMON
+#define CH3_01            0x03 //       (AIN1-) + (AIN2-)  |   AIN3 + COMMON
+
+enum channel {
+  ONE = CH0_01,              // [Register Pair 0]
+  TWO = CH1_01,              // [Register Pair 1]
+  COMMON = CH2_01,           // [Register Pair 0]
+  THREE = CH3_01             // [Register Pair 2]
+};
 
 // SETUP REGISTER
 #define STRG_MD_NORMAL_MODE_76     0x00
@@ -83,13 +90,6 @@
 #define CLRG_FS_CLK_IS_HIGH_60Hz_16Hz 0x01
 #define CLRG_FS_CLK_IS_HIGH_250Hz_66Hz 0x02
 #define CLRG_FS_CLK_IS_HIGH_500Hz_131Hz 0x03
-
-enum channel {
-  ONE = CH0_01,              // [Register Pair 0]
-  TWO = CH1_01,              // [Register Pair 1]
-  COMMON = CH2_01,           // [Register Pair 0]
-  THREE = CH3_01             // [Register Pair 2]
-};
 
 #define CHANNEL_MASK 0x03
 
