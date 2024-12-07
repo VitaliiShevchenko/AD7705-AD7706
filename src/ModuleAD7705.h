@@ -100,14 +100,14 @@ public:
   ModuleAD7705(); // Default constructor
 
   /**
-   * Perform a start initialization for AD7705.
+   * Perform a standart initialization for AD7705/AD7706.
    *
    * @return void
    */
   void init();
 
   /**
-   * Perform a "RESET ADC" operation for AD7705.
+   * Perform a "RESET ADC" operation for AD7705/AD7706.
    *
    * @return void
    */
