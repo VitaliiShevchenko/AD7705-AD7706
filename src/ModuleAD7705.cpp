@@ -20,57 +20,8 @@
 
 #include "ModuleAD7705.h"
 
-
 #define LOW  0x00
 #define HIGH 0x01
-
-#define READ_BIT(REG, BIT)   (((REG) >> (BIT)) & 1U)     // Read a bit
-#define SET_BIT(REG, BIT)    ((REG) |= (1U << (BIT)))    // Set a bit
-#define float NS2US(VAL)     (VAL/1000)                  // Convert nanoseconds(ns) to microseconds(ms)
-
-// Constants for better readability
-#define MILLISECS_PER_SEC 1000
-#define USECS_PER_SEC (1000 * 1000)
-#define NOPS_ns     62.5f                             // Arduino running at 16 MHz (NOP takes 62.5 ns)
-
-#define HZ2US(hz)   (1000000 / (hz))
-#define HZ2MS(hz)   (1000 / (hz))
-#define US2S(us)    ((us) * 1e-6f)
-#define US2MS(us)   ((us) * 1e-3f)
-#define MS2US(ms)   ((ms) * 1000)
-#define MS2S(ms)    ((ms) * 1e-3f)
-#define S2MS(s)     ((s) * MILLISECS_PER_SEC)
-#define DS2MS(ds)   ((ds) * 100)
-#define HZ2S(hz)    US2S(HZ2US(hz))
-
-#define TIME_WRITE           1                          // delay 1 ms
-#define CYCLES_LIMIT int     (320000)                    // 1s / 50tacts * 16000000Hz = 320000
-#define TIME_READ_DELAY      1                          // delay 1 ms
-#define START_TIME_DELAY_us  6                          // delay 6 us by 4.9512 MHz | 16 us by 2.4576 MHz | 20 us by 1MHz
-#define F_CLKIN_HZ           1.45 * 1e6                 // 400kHz-2.5MHz (For specified performance) 45-55% is the best
-#define T_FCLKIN_US double   (HZ2US(F_CLKIN_HZ/2))      //0.69us
-#define T_DRDY_us            (500*NS2US(T_FCLKIN_ns))   // During this time (345us), we need to get all the data from the serial output DOUT
-#define T2_ns                100                        // RESET pulse width (min value)
-
-// Read Operation 
-#define T3_ns             0                 // delay when DRDY to CS setup time (0ns - min value)
-#define T4_ns             120               // time between SCLK's HIGH LEVELS (CS falling edge to SCLK rising edge setup time) (120ns - min value)
-#define T5_ns             0                 // time between SCLK's HIGH LEVELS (SCLK falling edge to data valid delay 0-80ns(5V), 0-100ns(3V))
-#define T6_ns             100               // time when SCLK set to HIGH LEVELS (SCLK high pulse width (100ns - min value))
-#define T7_ns             100               // time when SCLK set to LOW  (SCLK low pulse width (100ns - min value))
-#define T8_ns             0                 // min time when SCLK set to HIGH LEVEL and start _CS to HIGH LEVEL (CS rising edge to SCLK rising edge hold time)
-#define T9_ns             50                // Bus relinquish time after SCLK rising edge 10-60ns(5V), 10-100ns(3V) 
-#define T10_ns            100               // SCLK falling edge to DRDY high (0-100ms)
-
-// Write operation
-#define T11_ns            120               // CS falling edge to SCLK rising edge setup time (120ns - min value)
-#define T12_ns            30                // Data valid to SCLK rising edge setup time (30ns - min value)
-#define T13_ns            20                // Data valid to SCLK rising edge hold time (20ns - min value)
-#define T14_ns            100               // SCLK high pulse width  (100ns - min value)
-#define T15_ns            100               // SCLK low pulse width (100ns- min value)
-#define T16_ns            0                 // CS rising edge to SCLK rising edge hold time (0ns - min value)
-
-   
 
 ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     _cs(cs_pin),
@@ -80,7 +31,7 @@ ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     // initialize OUTPUT pins
     pinMode(_cs,     OUTPUT);
     pinMode(_reset,  OUTPUT);
-    
+
     // initialize INPUT pins
     pinMode(_drdy,    INPUT);
 }
