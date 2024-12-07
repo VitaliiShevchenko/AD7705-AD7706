@@ -204,18 +204,18 @@ int ModuleAD7705::waitingOnDataReady()
 
 int ModuleAD7705::read_channel(uint8_t channel)
 {
-    SPI.transfer(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel);
+    SPI.transfer(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
     return read_serial_data_16();
 }
 
 int ModuleAD7705::read_clock_channel(uint8_t channel)
 {
-    SPI.transfer(ZERO_DRDY_7 & 0x00 | CLOCK_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel);  //0x28
+    SPI.transfer(ZERO_DRDY_7 & 0x00 | CLOCK_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
     return read_serial_data();
 }
 
 int ModuleAD7705::read_setup_channel(uint8_t channel)
 {
-    SPI.transfer(ZERO_DRDY_7 & 0x00 | SETUP_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel);  //0x28
+    SPI.transfer(ZERO_DRDY_7 & 0x00 | SETUP_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
     return read_serial_data();
 }

@@ -91,6 +91,8 @@ enum channel {
   COMMON = CH2_01
 };
 
+#define CHANNEL_MASK 0x03
+
 class ModuleAD7705 {
 
 public:
