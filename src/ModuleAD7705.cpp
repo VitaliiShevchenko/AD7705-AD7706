@@ -27,6 +27,9 @@
 
 #define DELAY_BY_RESET        50
 
+#define VOLTS_2_MILLIVOLTS(value)           value * 1000  
+#define ADC_BITRATE                        65536                
+
 ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     _cs(cs_pin),
     _reset(reset_pin),
@@ -187,3 +190,47 @@ void ModuleAD7705::unselect_adc()
 {
     digitalWrite(_cs, HIGH);
 }
+
+ void ModuleAD7705::set_max_range_in_volts(float volts)
+ {
+    _max_range_in_volts = volts;
+ }
+
+ float ModuleAD7705::val_into_millivolts(float data)
+ {
+    return VOLTS_2_MILLIVOLTS(data * _max_range_in_volts/ADC_BITRATE);
+ }
+
+
+ void ModuleAD7705::set_max_range_in_mA(float mA)
+ {
+    _max_range_in_mA = mA;
+ }
+
+ float ModuleAD7705::val_into_mA(float data)
+ {
+    return data * _max_range_in_mA/ADC_BITRATE;
+ }
+ 
+
+ void ModuleAD7705::set_max_range_in_kgs(float kgs)
+ {
+    _max_range_in_kgs = kgs;
+ }
+
+ float ModuleAD7705::val_into_kgs(float data)
+ {
+    return data * _max_range_in_kgs/ADC_BITRATE;
+ }
+
+  
+
+ void ModuleAD7705::set_max_range_in_Nm(float Nm)
+ {
+    _max_range_in_Nm = Nm;
+ }
+
+ float ModuleAD7705::val_into_Nm(float data)
+ {
+    return data * _max_range_in_Nm/ADC_BITRATE;
+ }

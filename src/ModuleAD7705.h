@@ -234,8 +234,56 @@ public:
     void   select_adc();
     void unselect_adc();
 
+    /**
+     * Function for set maximum range of measuring in volts
+     */
+    void set_max_range_in_volts(float volts);
+
+    /**
+     * Function for converting bit-value into millivolts
+     */
+    float val_into_millivolts(float data);
+
+
+    /**
+     * Function for set maximum range of measuring in mA
+     */
+    void set_max_range_in_mA(float mA);
+
+    /**
+     * Function for converting bit-value into mA
+     */
+    float val_into_mA(float data);
+
+
+    /**
+     * Function for set maximum range of measuring in kgs
+     */
+    void set_max_range_in_kgs(float kgs);
+
+    /**
+     * Function for converting bit-value into kgs
+     */
+    float val_into_kgs(float data);
+
+
+    /**
+     * Function for set maximum range of measuring in Nm
+     */
+    void set_max_range_in_Nm(float Nm);
+
+    /**
+     * Function for converting bit-value into Nm
+     */
+    float val_into_Nm(float data);
+
 private:
     uint8_t _cs, _reset, _drdy;
+    float _max_range_in_volts;
+    float _max_range_in_mA;
+    float _max_range_in_kgs;
+    float _max_range_in_Nm;
+
 
     /*
     * Setter for the external function for Writing Digital Pin by microcontroller
