@@ -128,17 +128,14 @@ public:
 
   /**
    * Performs a standart initialization for AD7705/AD7706 where frequency of oscillator is 4.91512 MHz.
-   * 
-   * @param channel choose channel. Use one from of such: ONE, TWO, THREE
    *
    * @return void
    */
-  void std_init_of_channel(uint8_t channel);
+  void std_init();
 
     /**
    * Performs customizing initialization for AD7705/AD7706 with specifics peculiarities .
    * 
-   * @param channel choose channel using keywords: ONE, TWO, THREE
    * @param fregADC choose frequency of oscillator using keywords: ADC_1MHZ, ADC_2MHz, ADC_2457kHZ, ADC_4915kHZ
    * @param output_rate choose output update rate using keywords: OUR_20_50HZ, OUR_25_60HZ, OUR_100_250HZ, OUR_250_500HZ
    * @param gain choose gain using keywords: STRG_GAIN[1,2,4,8,16,64,128]_543 
@@ -147,7 +144,7 @@ public:
    *
    * @return void
    */
-  void custom_init_of_channel(uint8_t channel, uint8_t fregADC_Hz, uint8_t output_rate, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state);
+  void custom_init( uint8_t fregADC_Hz, uint8_t output_rate, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state);
 
   /**
    * Perform a "RESET ADC" operation for AD7705/AD7706.
