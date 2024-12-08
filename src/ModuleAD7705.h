@@ -50,7 +50,7 @@ enum channel {
   THREE = CH3_01             // [Register Pair 2]
 };
 
-// SETUP REGISTER
+// SETUP REGISTER. The numbers in the end of the names indicate on the bits of the register.
 #define STRG_MD_NORMAL_MODE_76     0x00
 #define STRG_MD_SELF_CALIBR_76     0x40
 #define STRG_MD_ZERO_CALIBR_76     0x80
@@ -71,7 +71,7 @@ enum channel {
 // CLOCK REGISTER
 #define CLRG_FOR_CORRECT_OP_765     0x00
 #define CLRG_MASTER_CLOCK_DISABLE_4 0x10
-#define CLRG_CLOCK_DIVIDER_BY2_3    0x08
+#define CLRG_CLOCK_DIVIDER_BY2_3    0x08  //CLKDIV
 #define CLRG_CLOCK_BIT_2            0x04  //Clock Bit. This bit should be set in accordance with the operating frequency of the AD7705/AD7706. 
                                      /*If the device has a master clock frequency of 2.4576 MHz (CLKDIV = 0) or 4.9152 MHz (CLKDIV = 1), 
                                      this bit should be set to Logic 1. If the device has a master clock frequency of 1 MHz (CLKDIV = 0) 
@@ -102,7 +102,7 @@ public:
    *
    * @return void
    */
-  void init();
+  void std_init_of_channel(uint8_t channel);
 
   /**
    * Perform a "RESET ADC" operation for AD7705/AD7706.
@@ -277,12 +277,19 @@ public:
      */
     float val_into_Nm(float data);
 
+    
+    /**
+     * Function for set zero
+     */
+    void set_zero(int zero_value);
+
 private:
     uint8_t _cs, _reset, _drdy;
     float _max_range_in_volts;
     float _max_range_in_mA;
     float _max_range_in_kgs;
     float _max_range_in_Nm;
+    int   _zero;
 
 
     /*

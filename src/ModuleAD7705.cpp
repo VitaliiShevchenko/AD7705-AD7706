@@ -44,17 +44,18 @@ ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
 }
 
 
-void ModuleAD7705::init()
+void ModuleAD7705::std_init_of_channel(uint8_t channel)   
 {
-    reset_adc();
+    digitalWrite(_reset, HIGH);  // put _RESET to HIGH level
+    SPI.begin();
     // Choose CLOCK REGISTER with mode 'WRITE' next operation 
-    write_register(ZERO_DRDY_7&0 | CLOCK_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | CH0_01); //0x20
+    write_register(ZERO_DRDY_7&0 | CLOCK_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel); //0x20 for one channel
     // Write to the CLOCK REGISTER with oscilator = 4.9152 MHz, output update rate is 50 Hz and −3 dB Filter Cutoff is 13 Hz
     write_register(CLRG_FOR_CORRECT_OP_765 | CLRG_MASTER_CLOCK_DISABLE_4&0 | CLRG_CLOCK_DIVIDER_BY2_3 | CLRG_CLOCK_BIT_2 | CLRG_FS_CLK_IS_HIGH_50Hz_13Hz);//0x0C
     // Choose SETUP REGISTER
-    write_register(ZERO_DRDY_7&0 | SETUP_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | CH0_01) ;    //0x10
+    write_register(ZERO_DRDY_7&0 | SETUP_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel) ;    //0x10 for one channel
     // Write to the SETUP REGISTER: self-calibration, unipolar mode(0 to 5v) and buffer disable
-    write_register(STRG_MD_SELF_CALIBR_76 | STRG_GAIN1_543 | STRG_UNIPOLAR_OPERATION_2 | STRG_BUFFER_ENABLE_1 &0| STRG_FSYNC_IN_RESET_STATE&0);//0x44
+    write_register(STRG_MD_SELF_CALIBR_76 | STRG_GAIN1_543 | STRG_UNIPOLAR_OPERATION_2 | STRG_BUFFER_ENABLE_1 &1| STRG_FSYNC_IN_RESET_STATE&0);//0x44
 }
 
 
@@ -183,12 +184,14 @@ int ModuleAD7705::read_setup_channel(uint8_t channel)
 
 void ModuleAD7705::select_adc()
 {
+    SPI.beginTransaction(SPISettings(F_CPU, MSBFIRST, SPI_MODE0));
     digitalWrite(_cs, LOW);
 }
 
 void ModuleAD7705::unselect_adc()
 {
     digitalWrite(_cs, HIGH);
+    SPI.endTransaction();
 }
 
  void ModuleAD7705::set_max_range_in_volts(float volts)
@@ -198,6 +201,7 @@ void ModuleAD7705::unselect_adc()
 
  float ModuleAD7705::val_into_millivolts(float data)
  {
+    data = data - _zero;
     return VOLTS_2_MILLIVOLTS(data * _max_range_in_volts/ADC_BITRATE);
  }
 
@@ -209,6 +213,7 @@ void ModuleAD7705::unselect_adc()
 
  float ModuleAD7705::val_into_mA(float data)
  {
+    data = data - _zero;
     return data * _max_range_in_mA/ADC_BITRATE;
  }
  
@@ -220,6 +225,7 @@ void ModuleAD7705::unselect_adc()
 
  float ModuleAD7705::val_into_kgs(float data)
  {
+    data = data - _zero;
     return data * _max_range_in_kgs/ADC_BITRATE;
  }
 
@@ -232,5 +238,11 @@ void ModuleAD7705::unselect_adc()
 
  float ModuleAD7705::val_into_Nm(float data)
  {
+    data = data - _zero;
     return data * _max_range_in_Nm/ADC_BITRATE;
+ }
+
+  void ModuleAD7705::set_zero(int zero_value)
+ {
+    _zero = zero_value;
  }
