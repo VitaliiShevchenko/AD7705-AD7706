@@ -44,10 +44,10 @@
 #define CH3_01            0x03 //       (AIN1-) + (AIN2-)  |   AIN3 + COMMON
 
 enum channel {
-  ONE = CH0_01,              // [Register Pair 0]
-  TWO = CH1_01,              // [Register Pair 1]
-  COMMON = CH2_01,           // [Register Pair 0]
-  THREE = CH3_01             // [Register Pair 2]
+  ONE = CH0_01,                //       [Register Pair 0]
+  TWO = CH1_01,                //       [Register Pair 1]
+  COMMON = CH2_01,             //       [Register Pair 0]
+  THREE = CH3_01               //       [Register Pair 2]
 };
 
 // SETUP REGISTER. The numbers in the end of the names indicate on the bits of the register.
@@ -79,17 +79,46 @@ enum channel {
                                      for a given operating frequency and, together with FS1 and FS0, chooses the output update rate for the device. 
                                      If this bit is not set correctly for the master clock frequency of the device, the AD7705/AD7706 might not 
                                      operate to specification.*/
-//CLK1 FS1 FS0 Output Update Rate −3 dB Filter Cutoff
-#define CLRG_FS_CLK_IS_LOW_20Hz_5Hz 0x00
-#define CLRG_FS_CLK_IS_LOW_25Hz_7Hz 0x01
-#define CLRG_FS_CLK_IS_LOW_100Hz_26Hz 0x02
-#define CLRG_FS_CLK_IS_LOW_200Hz_52Hz 0x03
-#define CLRG_FS_CLK_IS_HIGH_50Hz_13Hz 0x00
-#define CLRG_FS_CLK_IS_HIGH_60Hz_16Hz 0x01
-#define CLRG_FS_CLK_IS_HIGH_250Hz_66Hz 0x02
+//CLK1 FS1 FS0 [Output Update Rate] [−3 dB Filter Cutoff](last value)
+#define     CLRG_FS_CLK_IS_LOW_20Hz_5Hz 0x00
+#define     CLRG_FS_CLK_IS_LOW_25Hz_7Hz 0x01
+#define   CLRG_FS_CLK_IS_LOW_100Hz_26Hz 0x02
+#define   CLRG_FS_CLK_IS_LOW_200Hz_52Hz 0x03
+#define   CLRG_FS_CLK_IS_HIGH_50Hz_13Hz 0x00
+#define   CLRG_FS_CLK_IS_HIGH_60Hz_16Hz 0x01
+#define  CLRG_FS_CLK_IS_HIGH_250Hz_66Hz 0x02
 #define CLRG_FS_CLK_IS_HIGH_500Hz_131Hz 0x03
 
-#define CHANNEL_MASK 0x03
+enum fregADC {
+  ADC_1MHZ    = CLRG_CLOCK_DIVIDER_BY2_3 & 0 | CLRG_CLOCK_BIT_2 & 0,
+  ADC_2MHz    =     CLRG_CLOCK_DIVIDER_BY2_3 | CLRG_CLOCK_BIT_2 & 0,
+  ADC_2457kHZ = CLRG_CLOCK_DIVIDER_BY2_3 & 0 | CLRG_CLOCK_BIT_2,
+  ADC_4915kHZ =     CLRG_CLOCK_DIVIDER_BY2_3 | CLRG_CLOCK_BIT_2
+};
+
+enum outputUpdateRate{
+  OUR_20_50HZ   = 0x00,
+  OUR_25_60HZ   = 0x01,
+  OUR_100_250HZ = 0x02,
+  OUR_250_500HZ = 0x03
+};
+
+enum polar{
+  UNIPOLAR = STRG_UNIPOLAR_OPERATION_2,
+  BIPOLAR  = STRG_BIPOLAR_OPERATION_2
+};
+
+enum buffer{
+  BUFFER_ENABLE = STRG_BUFFER_ENABLE_1,
+  BUFFER_DISABLE = STRG_BUFFER_ENABLE_1 & 0
+};  
+
+#define CHANNEL_MASK  0x03
+#define FREG_ADC_MASK 0x06
+#define GAIN_MASK     0x38
+#define OUR_MASK      0x03
+#define POLAR_MASK    0x04
+#define BUFFER_MASK   0x02
 
 class ModuleAD7705 {
 
@@ -98,11 +127,27 @@ public:
   ModuleAD7705(); // Default constructor
 
   /**
-   * Perform a standart initialization for AD7705/AD7706.
+   * Performs a standart initialization for AD7705/AD7706 where frequency of oscillator is 4.91512 MHz.
+   * 
+   * @param channel choose channel. Use one from of such: ONE, TWO, THREE
    *
    * @return void
    */
   void std_init_of_channel(uint8_t channel);
+
+    /**
+   * Performs customizing initialization for AD7705/AD7706 with specifics peculiarities .
+   * 
+   * @param channel choose channel using keywords: ONE, TWO, THREE
+   * @param fregADC choose frequency of oscillator using keywords: ADC_1MHZ, ADC_2MHz, ADC_2457kHZ, ADC_4915kHZ
+   * @param output_rate choose output update rate using keywords: OUR_20_50HZ, OUR_25_60HZ, OUR_100_250HZ, OUR_250_500HZ
+   * @param gain choose gain using keywords: STRG_GAIN[1,2,4,8,16,64,128]_543 
+   * @param uni_bipolar choose UNIPOLAR or BIPOLAR operation
+   * @param buf_state choose BUFFER_ENABLE or BUFFER_DISABLE
+   *
+   * @return void
+   */
+  void custom_init_of_channel(uint8_t channel, uint8_t fregADC_Hz, uint8_t output_rate, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state);
 
   /**
    * Perform a "RESET ADC" operation for AD7705/AD7706.
@@ -142,7 +187,7 @@ public:
    /**
    * Reading data from the Data Register of the determined AD7705/AD7706 channel
    * 
-   * @param channel from the MACRO function CHx_01
+   * @param channel - choose channel. Use one from of such: ONE, TWO, THREE
    *
    * @return 16-bit value of the choose channel
    */
@@ -151,7 +196,7 @@ public:
    /**
    * Reading data from the Clock Register of the determined AD7705/AD7706 channel
    * 
-   * @param channel from the MACRO function CHx_01
+   * @param channel - choose channel. Use one from of such: ONE, TWO, THREE
    *
    * @return 8-bit value of the choose channel
    */
@@ -160,7 +205,7 @@ public:
      /**
    * Reading data from the Setup Register of the determined AD7705/AD7706 channel
    * 
-   * @param channel from the MACRO function CHx_01
+   * @param channel - choose channel. Use one from of such: ONE, TWO, THREE
    *
    * @return 8-bit value of the choose channel
    */

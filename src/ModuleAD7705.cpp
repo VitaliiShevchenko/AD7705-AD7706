@@ -49,13 +49,25 @@ void ModuleAD7705::std_init_of_channel(uint8_t channel)
     digitalWrite(_reset, HIGH);  // put _RESET to HIGH level
     SPI.begin();
     // Choose CLOCK REGISTER with mode 'WRITE' next operation 
-    write_register(ZERO_DRDY_7&0 | CLOCK_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel); //0x20 for one channel
+    write_register(ZERO_DRDY_7&0 | CLOCK_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK); //0x20 for one channel
     // Write to the CLOCK REGISTER with oscilator = 4.9152 MHz, output update rate is 50 Hz and −3 dB Filter Cutoff is 13 Hz
     write_register(CLRG_FOR_CORRECT_OP_765 | CLRG_MASTER_CLOCK_DISABLE_4&0 | CLRG_CLOCK_DIVIDER_BY2_3 | CLRG_CLOCK_BIT_2 | CLRG_FS_CLK_IS_HIGH_50Hz_13Hz);//0x0C
     // Choose SETUP REGISTER
-    write_register(ZERO_DRDY_7&0 | SETUP_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel) ;    //0x10 for one channel
+    write_register(ZERO_DRDY_7&0 | SETUP_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK); //0x10 for one channel
     // Write to the SETUP REGISTER: self-calibration, unipolar mode(0 to 5v) and buffer disable
-    write_register(STRG_MD_SELF_CALIBR_76 | STRG_GAIN1_543 | STRG_UNIPOLAR_OPERATION_2 | STRG_BUFFER_ENABLE_1 &1| STRG_FSYNC_IN_RESET_STATE&0);//0x44
+    write_register(STRG_MD_SELF_CALIBR_76 | STRG_GAIN1_543 | STRG_UNIPOLAR_OPERATION_2 | STRG_BUFFER_ENABLE_1 & 1| STRG_FSYNC_IN_RESET_STATE & 0);//0x44
+}
+
+void ModuleAD7705::custom_init_of_channel(uint8_t channel, uint8_t fregADC_Hz, uint8_t output_rate, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state)
+{
+    digitalWrite(_reset, HIGH);  // put _RESET to HIGH level
+    SPI.begin();
+                  // Choose CLOCK REGISTER with mode 'WRITE' next operation 
+    write_register(ZERO_DRDY_7&0 | CLOCK_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK); 
+    write_register(CLRG_FOR_CORRECT_OP_765 | CLRG_MASTER_CLOCK_DISABLE_4&0 | fregADC_Hz & FREG_ADC_MASK | output_rate & OUR_MASK);
+                  // Choose SETUP REGISTER
+    write_register(ZERO_DRDY_7&0 | SETUP_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
+    write_register(STRG_MD_SELF_CALIBR_76 | gain & GAIN_MASK | uni_bipolar & POLAR_MASK| buf_state & BUFFER_MASK| STRG_FSYNC_IN_RESET_STATE & 0);
 }
 
 
