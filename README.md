@@ -16,4 +16,9 @@ This software(driver) are using to read the analogue signals through the 16-bit 
 7. In your files, use the `#include <ModuleAD7705.h>` directive.
 
 ### More detailed information about using any function in this project by the request
+### Give coffee as a gift with a sincere desire :-)
+
+### Use LinkedIn https://www.linkedin.com/in/vitalii-shevchenko-978247184/ for set contact.
+
+
 
