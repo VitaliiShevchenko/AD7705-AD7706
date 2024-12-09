@@ -7,13 +7,13 @@ This software(driver) are using to read the analogue signals through the 16-bit 
 
 ## Usage
 
-1. Choose a folder where are situating your project files `cd your_project`
-2. Create new folder `mkdir libraries`
-3. Go into the library `cd libraries` 
-4. Download files into this folder `git clone https://github.com/VitaliiShevchenko/AD7705-AD7706`
-5. After success downloaded has been created folder with such name `AD7705-AD7706`
-6. In the Arduino IDE tab on the `Sketch`, choose `Include Library` and choose below the title `library contributed` our library `AD7705-AD7706`
-7. In your files use directiveness `#include <ModuleAD7705.h>`
+1. Select the folder where your project files are located `cd your_project`.
+2. Create a new folder `$ mkdir libraries`.
+3. Go to the library `$ cd libraries` .
+4. Upload the files to this folder `$ git clone https://github.com/VitaliiShevchenko/AD7705-AD7706`.
+5. After successful upload a folder  name `AD7705-AD7706` was created .
+6. In the Arduino IDE tab on the `Sketch`, select `Include Library` and select our `AD7705-AD7706` library under `library contributed`.
+7. In your files, use the `#include <ModuleAD7705.h>` directive.
 
 ### More detailed information about using any function in this project by the request
 
