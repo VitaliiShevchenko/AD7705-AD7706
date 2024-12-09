@@ -28,7 +28,13 @@
 #define DELAY_BY_RESET        50
 
 #define VOLTS_2_MILLIVOLTS(value)           value * 1000  
-#define ADC_BITRATE                        4096                
+#define ADC_BITRATE                        4096  
+
+enum {
+    ONE_BYTE = 1,
+    TWO_BYTES = 2,
+    THREE_BYTES = 3
+};
 
 ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     _cs(cs_pin),
@@ -107,36 +113,34 @@ bool ModuleAD7705::digitalRead(uint8_t pin)
     return readDigitalPin(pin);
 }
 
+
+int ModuleAD7705::read_serial_data_byByte(size_t bytes)
+{
+    waitingOnDataReady();
+    int recieved_data = SPI.transfer(0x00);
+    while(--bytes){
+        recieved_data = recieved_data << 8;
+        recieved_data |= SPI.transfer(0x00);
+    }
+
+    return recieved_data;
+}
+
+
+
 void ModuleAD7705::write_register(uint8_t instruction)
 {
     SPI.transfer(instruction);
 }
 
-uint8_t ModuleAD7705::read_serial_data()
+int ModuleAD7705::write_register_24(uint32_t data)
 {
-    uint8_t data = 0x00;
-    waitingOnDataReady();
-    data = SPI.transfer(data);  // read 8-bits Register
-    return data;
-}
+    uint8_t buf[3] = {(data >> 16) & 0xFF, (data >> 8) & 0xFF, data & 0xFF};
+    size_t   bytes = 3;
 
-uint16_t ModuleAD7705::read_serial_data_16()
-{
-    digitalWrite(_cs, LOW);
-    uint16_t data = 0x00;
-    waitingOnDataReady();
-    data = SPI.transfer16(data);  //read 16-bits Register
+    SPI.transfer(buf, bytes);
 
-    return data; 
-}
-
-int ModuleAD7705::read_serial_data_24()
-{
-    int data = 0x00;
-    waitingOnDataReady();
-    SPI.transfer(data, 3);    //read 24-bits Register
-
-    return data;
+    return buf[0] << 16 | buf[1] << 8 | buf[2];
 }
 
 int ModuleAD7705::waitingOnDataReady()
@@ -161,7 +165,7 @@ int ModuleAD7705::read_channel(uint8_t channel)
 {
     select_adc();
     write_register(ZERO_DRDY_7 & 0 | DATA_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
-    uint16_t data = read_serial_data_16();
+    uint16_t data = read_serial_data_byByte(TWO_BYTES);
     unselect_adc();
 
     return data;
@@ -171,7 +175,7 @@ int ModuleAD7705::read_clock_channel(uint8_t channel)
 {
     select_adc();
     write_register(ZERO_DRDY_7 & 0x00 | CLOCK_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
-    uint8_t data = read_serial_data();
+    uint8_t data = read_serial_data_byByte(ONE_BYTE);
     unselect_adc();
 
     return data;
@@ -181,7 +185,27 @@ int ModuleAD7705::read_setup_channel(uint8_t channel)
 {
     select_adc();
     write_register(ZERO_DRDY_7 & 0x00 | SETUP_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
-    uint8_t data = read_serial_data();
+    uint8_t data = read_serial_data_byByte(ONE_BYTE);
+    unselect_adc();
+
+    return data;
+}
+
+int ModuleAD7705::read_offset_channel(uint8_t channel)
+{
+    select_adc();
+    write_register(ZERO_DRDY_7 & 0x00 | OFFSET_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
+    int data = read_serial_data_byByte(THREE_BYTES);
+    unselect_adc();
+
+    return data;
+}
+
+int ModuleAD7705::read_gain_channel(uint8_t channel)
+{
+    select_adc();
+    write_register(ZERO_DRDY_7 & 0x00 | GAIN_REG_456 | READ_3 | NORMAL_OP_MODE_2 | channel & CHANNEL_MASK);
+    int data = read_serial_data_byByte(THREE_BYTES);
     unselect_adc();
 
     return data;

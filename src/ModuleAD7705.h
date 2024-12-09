@@ -165,30 +165,25 @@ public:
   /**
    * Perform a "Read Data Ready status (DRDY)" operation for the specified id
    *
-   * @return discrete output value
+   * @return recieved data
    */
   bool isDataReady();
 
    /**
-   * Perform a "Read 8-bit data from the Serial pin DOUT of AD7705/AD7706"
+   * Perform a "Read data from the Serial pin DOUT of AD7705/AD7706 by byte"
+   * 
+   * @param bytes amount bytes for reading.Using such keywords: ONE_BYTE, TWO_BYTES, THREE_BYTES
    *
-   * @return discrete output value
+   * @return recieved data
    */
-  uint8_t read_serial_data();
+  int ModuleAD7705::read_serial_data_byByte(size_t bytes);
 
    /**
-   * Perform a "Read 16-bit data from the Serial pin DOUT of AD7705/AD7706"
+   * Perform a "Write 24-bit data to the Serial pin DIN of AD7705/AD7706"
    *
-   * @return discrete output value
+   * @return void
    */
-  uint16_t read_serial_data_16();
-
-   /**
-   * Perform a "Read 24-bit data from the Serial pin DOUT of AD7705/AD7706"
-   *
-   * @return boolean
-   */
-  int read_serial_data_24();
+  int write_register_24(uint32_t data);
 
    /**
    * Reading data from the Data Register of the determined AD7705/AD7706 channel
@@ -216,6 +211,25 @@ public:
    * @return 8-bit value of the choose channel
    */
   int read_setup_channel(uint8_t channel);
+
+
+  /**
+   * Reading data from the Offset Register of the determined AD7705/AD7706 channel
+   * 
+   * @param channel - choose channel. Use one from of such: ONE, TWO, THREE
+   *
+   * @return 24-bit value of the choose channel
+   */
+  int ModuleAD7705::read_offset_channel(uint8_t channel);
+
+  /**
+   * Reading data from the Gain Register of the determined AD7705/AD7706 channel
+   * 
+   * @param channel - choose channel. Use one from of such: ONE, TWO, THREE
+   *
+   * @return 24-bit value of the choose channel
+   */
+  int ModuleAD7705::read_gain_channel(uint8_t channel);
 
 
    /**
