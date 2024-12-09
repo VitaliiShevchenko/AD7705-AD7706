@@ -68,6 +68,13 @@ enum channel {
 #define STRG_BUFFER_ENABLE_1       0x02
 #define STRG_FSYNC_IN_RESET_STATE  0x01
 
+enum calibration{
+  NORMAL_MODE = STRG_MD_NORMAL_MODE_76,
+  SELF_CALIBR = STRG_MD_SELF_CALIBR_76,
+  ZERO_CALIBR = STRG_MD_ZERO_CALIBR_76,
+  FULL_CALIBR = STRG_MD_FULL_CALIBR_76
+};
+
 // CLOCK REGISTER
 #define CLRG_FOR_CORRECT_OP_765     0x00
 #define CLRG_MASTER_CLOCK_DISABLE_4 0x10
@@ -115,6 +122,7 @@ enum buffer{
 
 #define CHANNEL_MASK  0x03
 #define FREG_ADC_MASK 0x06
+#define CALIBR_MASK   0xC0
 #define GAIN_MASK     0x38
 #define OUR_MASK      0x03
 #define POLAR_MASK    0x04
@@ -138,13 +146,14 @@ public:
    * 
    * @param fregADC choose frequency of oscillator using keywords: ADC_1MHZ, ADC_2MHz, ADC_2457kHZ, ADC_4915kHZ
    * @param output_rate choose output update rate using keywords: OUR_20_50HZ, OUR_25_60HZ, OUR_100_250HZ, OUR_250_500HZ
+   * @param calibr choose calibration using keywords: NORMAL_MODE, SELF_CALIBR, ZERO_CALIBR, FULL_CALIBR
    * @param gain choose gain using keywords: STRG_GAIN[1,2,4,8,16,64,128]_543 
    * @param uni_bipolar choose UNIPOLAR or BIPOLAR operation
    * @param buf_state choose BUFFER_ENABLE or BUFFER_DISABLE
    *
    * @return void
    */
-  void custom_init( uint8_t fregADC_Hz, uint8_t output_rate, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state);
+  void custom_init( uint8_t fregADC_Hz, uint8_t output_rate, uint8_t calibr, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state);
 
   /**
    * Perform a "RESET ADC" operation for AD7705/AD7706.

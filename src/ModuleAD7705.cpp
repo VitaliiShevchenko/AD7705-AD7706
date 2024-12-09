@@ -28,7 +28,7 @@
 #define DELAY_BY_RESET        50
 
 #define VOLTS_2_MILLIVOLTS(value)           value * 1000  
-#define ADC_BITRATE                        65536                
+#define ADC_BITRATE                        4096                
 
 ModuleAD7705::ModuleAD7705(uint8_t cs_pin, uint8_t reset_pin, uint8_t drdy_pin):
     _cs(cs_pin),
@@ -48,10 +48,10 @@ void ModuleAD7705::std_init()
 {
     // Write to the CLOCK REGISTER with oscilator = 4.9152 MHz, output update rate is 50 Hz and −3 dB Filter Cutoff is 13 Hz
     // Write to the SETUP REGISTER: self-calibration, unipolar mode(0 to 5v) and buffer disable
-    custom_init( ADC_4915kHZ, OUR_20_50HZ, STRG_GAIN1_543, UNIPOLAR, BUFFER_ENABLE );
+    custom_init( ADC_4915kHZ, OUR_20_50HZ, SELF_CALIBR, STRG_GAIN1_543, UNIPOLAR, BUFFER_ENABLE );
 }
 
-void ModuleAD7705::custom_init( uint8_t fregADC_Hz, uint8_t output_rate, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state)
+void ModuleAD7705::custom_init( uint8_t fregADC_Hz, uint8_t output_rate, uint8_t calibr, uint8_t gain, uint8_t uni_bipolar, uint8_t buf_state)
 {
     digitalWrite(_reset, HIGH);  // put _RESET to HIGH level
     SPI.begin();
@@ -60,7 +60,7 @@ void ModuleAD7705::custom_init( uint8_t fregADC_Hz, uint8_t output_rate, uint8_t
     write_register(CLRG_FOR_CORRECT_OP_765 | CLRG_MASTER_CLOCK_DISABLE_4&0 | fregADC_Hz & FREG_ADC_MASK | output_rate & OUR_MASK);
                   // Choose SETUP REGISTER
     write_register(ZERO_DRDY_7&0 | SETUP_REG_456 | WRITE_3 | NORMAL_OP_MODE_2 | CH0_01);
-    write_register(STRG_MD_SELF_CALIBR_76 | gain & GAIN_MASK | uni_bipolar & POLAR_MASK| buf_state & BUFFER_MASK| STRG_FSYNC_IN_RESET_STATE & 0);
+    write_register(calibr & CALIBR_MASK | gain & GAIN_MASK | uni_bipolar & POLAR_MASK| buf_state & BUFFER_MASK| STRG_FSYNC_IN_RESET_STATE & 0);
 }
 
 
